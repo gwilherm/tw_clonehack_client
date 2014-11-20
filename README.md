@@ -17,7 +17,7 @@ Key bindings
 You can bind commands to keys for a better experience.  
 
 In F1 console, type :
-	bind k toggle cl\_dummy\_copymoves 0 1
+> bind k "toggle cl\_dummy\_copymoves 0 1"
 
 
 - - -
