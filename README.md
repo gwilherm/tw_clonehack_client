@@ -10,7 +10,7 @@ New commands :
 * `cl_dummy_copymoves 0` → Deactivate the clone
 * `cl_dummy_copymoves_delay t` (0≤t<200) → Delay the clone of t ticks (t\*50ms)
 
-_Note : you can do hookfly with a 15 ticks delay_  
+_Note : you can do hookfly with a ~13 ticks delay_  
 
 HowTo
 ---
