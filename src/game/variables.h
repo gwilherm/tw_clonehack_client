@@ -96,6 +96,7 @@ MACRO_CONFIG_STR(DummySkin, dummy_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SA
 MACRO_CONFIG_INT(ClDummy, cl_dummy, 0, 0, 1, CFGFLAG_CLIENT, "0 - player / 1 - dummy")
 MACRO_CONFIG_INT(ClDummyCopyMoves, cl_dummy_copymoves, 0, 0, 1, CFGFLAG_CLIENT, "Whether dummy is copying your moves")
 MACRO_CONFIG_INT(ClDummyCopyMovesDelay, cl_dummy_copymoves_delay, 0, 0, 199, CFGFLAG_CLIENT, "Adds a delay to dummy clone - 0 to 199 ticks (1 tick = 50ms)")
+MACRO_CONFIG_INT(ClDummyCopyMovesMirror, cl_dummy_copymoves_mirror, 0, 0, 3, CFGFLAG_CLIENT, "0 - No mirror / 1 - Direction mirror / 2 - Spin mirror / 3 - Mirror both")
 MACRO_CONFIG_INT(ClDummyHammer, cl_dummy_hammer, 0, 0, 1, CFGFLAG_CLIENT, "Whether dummy is hammering for a hammerfly")
 MACRO_CONFIG_INT(ClDummyResetOnSwitch, cl_dummy_resetonswitch, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether dummy should stop pressing keys when you switch")
 
