@@ -9,6 +9,10 @@ New commands :
 * `cl_dummy_copymoves 1` → Activate the clone
 * `cl_dummy_copymoves 0` → Deactivate the clone
 * `cl_dummy_copymoves_delay t` (0≤t<200) → Delay the clone of t ticks (t\*50ms)
+* `cl_dummy_copymoves_mirror 1` → Clone's direction is x-axis mirrored
+* `cl_dummy_copymoves_mirror 2` → Clone's target is x-axis mirrored
+* `cl_dummy_copymoves_mirror 3` → Both direction and target are x-axis mirrored
+* `cl_dummy_copymoves_mirror 0` → Deactivate the mirroring
 
 _Note : you can do hookfly with a ~13 ticks delay_  
 
