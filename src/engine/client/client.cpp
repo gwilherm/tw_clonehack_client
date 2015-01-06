@@ -1153,7 +1153,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			{
 				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
 
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__) && defined(PLZ_UPDATE_DDNET_TO_THE_LASTEST_VERSION_AND_OVERWRITE_DAT_BULLSHIT)
 				if (g_Config.m_ClAutoUpdate)
 				{
 					str_format(aBuf, sizeof(aBuf), "Checking for updates");

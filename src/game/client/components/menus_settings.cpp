@@ -1887,7 +1887,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	// Auto Update
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__) && defined(PLZ_UPDATE_DDNET_TO_THE_LASTEST_VERSION_AND_OVERWRITE_DAT_BULLSHIT)
 	CUIRect HUDItem;
 	Left.HSplitTop(20.0f, &HUDItem, &Left);
 	HUDItem.VSplitMid(&HUDItem, &Button);
