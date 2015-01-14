@@ -310,6 +310,17 @@ int CControls::SnapInput(int *pData)
 			Send = true;
 	}
 
+
+    if(g_Config.m_ClDummyCopyMoves){
+        m_InputData[!g_Config.m_ClDummy].m_Fire = m_InputData[g_Config.m_ClDummy].m_Fire;
+        m_LastData[!g_Config.m_ClDummy].m_Fire = m_LastData[g_Config.m_ClDummy].m_Fire;
+        m_InputData[!g_Config.m_ClDummy].m_NextWeapon = m_InputData[g_Config.m_ClDummy].m_NextWeapon;
+        m_InputData[!g_Config.m_ClDummy].m_PrevWeapon = m_InputData[g_Config.m_ClDummy].m_PrevWeapon;
+        m_LastData[!g_Config.m_ClDummy].m_NextWeapon = m_LastData[g_Config.m_ClDummy].m_NextWeapon;
+        m_LastData[!g_Config.m_ClDummy].m_PrevWeapon = m_LastData[g_Config.m_ClDummy].m_PrevWeapon;
+
+    }
+
 	// copy and return size
 	m_LastData[g_Config.m_ClDummy] = m_InputData[g_Config.m_ClDummy];
 
