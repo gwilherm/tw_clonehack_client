@@ -1272,13 +1272,9 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		// version note
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[64];
-		if(str_comp(Client()->LatestVersion(), "0") != 0)
-		{
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out! Download it at ddnet.tw!"), Client()->LatestVersion());
-			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
-		}
-		else
-			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
+
+		str_format(aBuf, sizeof(aBuf), "Clone Hack by ♔ Keep Calm.");
+
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 

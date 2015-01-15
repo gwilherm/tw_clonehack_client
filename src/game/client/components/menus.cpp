@@ -20,7 +20,6 @@
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <engine/autoupdate.h>
 #include <engine/shared/config.h>
 
 #include <game/version.h>
@@ -588,15 +587,6 @@ int CMenus::RenderMenubar(CUIRect r)
 	{
 		// offline menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
-		static int s_NewsButton=0;
-		if (DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_T))
-		{
-			NewPage = PAGE_NEWS;
-			m_DoubleClickIndex = -1;
-		}
-		Box.VSplitLeft(10.0f, 0, &Box);
-
-		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_InternetButton=0;
 		if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
 		{
@@ -769,35 +759,6 @@ void CMenus::RenderLoading()
 	Graphics()->Swap();
 }
 
-void CMenus::RenderNews(CUIRect MainView)
-{
-	// TODO: Like the settings with big fonts
-	// Make it work WITHOUT version updates
-	// Show news once after each version or news update
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
-
-	MainView.HSplitTop(15.0f, 0, &MainView);
-	MainView.VSplitLeft(15.0f, 0, &MainView);
-
-	CUIRect Label;
-
-	std::istringstream f(Client()->m_aNews);
-	std::string line;
-	while (std::getline(f, line))
-	{
-		if(line.size() > 0 && line.at(0) == '|' && line.at(line.size()-1) == '|')
-		{
-			MainView.HSplitTop(30.0f, &Label, &MainView);
-			UI()->DoLabelScaled(&Label, Localize(line.substr(1, line.size()-2).c_str()), 20.0f, -1);
-		}
-		else
-		{
-			MainView.HSplitTop(20.0f, &Label, &MainView);
-			UI()->DoLabelScaled(&Label, line.c_str(), 15.f, -1, MainView.w-30.0f);
-		}
-	}
-}
-
 void CMenus::OnInit()
 {
 
@@ -935,7 +896,7 @@ int CMenus::Render()
 		RenderMenubar(TabBar);
 
 		// news is not implemented yet
-		if(g_Config.m_UiPage < PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
+		if(g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
 		{
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			g_Config.m_UiPage = PAGE_INTERNET;
@@ -962,8 +923,6 @@ int CMenus::Render()
 			else if(m_GamePage == PAGE_BROWSER)
 				RenderInGameBrowser(MainView);
 		}
-		else if(g_Config.m_UiPage == PAGE_NEWS)
-			RenderNews(MainView);
 		else if(g_Config.m_UiPage == PAGE_INTERNET)
 			RenderServerbrowser(MainView);
 		else if(g_Config.m_UiPage == PAGE_LAN)
@@ -1094,14 +1053,6 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-		else if(m_Popup == POPUP_AUTOUPDATE)
-		{
-			pTitle = Localize("Auto-Update");
-			pExtraText = Localize("An update to DDNet client is available. Do you want to update now? This will restart the client. If an update fails, make sure the client has permissions to modify files.");
-			ExtraAlign = -1;
-		}
-#endif
 
 		CUIRect Box, Part;
 		Box = Screen;
@@ -1185,28 +1136,7 @@ int CMenus::Render()
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				Client()->Disconnect();
 		}
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-		else if(m_Popup == POPUP_AUTOUPDATE)
-		{
-			CUIRect Yes, No;
-			Box.HSplitBottom(20.f, &Box, &Part);
-			Box.HSplitBottom(24.f, &Box, &Part);
 
-			// buttons
-			Part.VMargin(80.0f, &Part);
-			Part.VSplitMid(&No, &Yes);
-			Yes.VMargin(20.0f, &Yes);
-			No.VMargin(20.0f, &No);
-
-			static int s_ButtonAbort = 0;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
-				m_Popup = POPUP_NONE;
-
-			static int s_ButtonTryAgain = 0;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
-				m_pClient->AutoUpdate()->DoUpdates(this);
-		}
-#endif
 		else if(m_Popup == POPUP_PASSWORD)
 		{
 			CUIRect Label, TextBox, TryAgain, Abort;

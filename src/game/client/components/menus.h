@@ -207,7 +207,6 @@ class CMenus : public CComponent
 	//void render_background();
 	//void render_loading(float percent);
 	int RenderMenubar(CUIRect r);
-	void RenderNews(CUIRect MainView);
 
 	// found in menus_demo.cpp
 	void RenderDemoPlayer(CUIRect MainView);
@@ -269,8 +268,7 @@ public:
 
 	enum
 	{
-		PAGE_NEWS=1,
-		PAGE_GAME,
+		PAGE_GAME=1,
 		PAGE_PLAYERS,
 		PAGE_SERVER_INFO,
 		PAGE_CALLVOTE,

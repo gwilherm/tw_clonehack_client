@@ -26,7 +26,6 @@
 #include <engine/map.h>
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
-#include <engine/autoupdate.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -53,7 +52,6 @@
 
 #include "friends.h"
 #include "serverbrowser.h"
-#include "autoupdate.h"
 #include "client.h"
 
 #include <zlib.h>
@@ -1151,34 +1149,10 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				aVersion);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/version", aBuf);
 
-			// assume version is out of date when version-data doesn't match
-			if(!VersionMatch)
-			{
-				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
-
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-				if (g_Config.m_ClAutoUpdate)
-				{
-					str_format(aBuf, sizeof(aBuf), "Checking for updates");
-					((CGameClient *) GameClient())->m_pMenus->RenderUpdating(aBuf);
-					((CGameClient *) GameClient())->AutoUpdate()->CheckUpdates(((CGameClient *) GameClient())->m_pMenus);
-				}
-#endif
-			}
-
-			// request the news
-			CNetChunk Packet;
-			mem_zero(&Packet, sizeof(Packet));
-			Packet.m_ClientID = -1;
-			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-			Packet.m_pData = VERSIONSRV_GETNEWS;
-			Packet.m_DataSize = sizeof(VERSIONSRV_GETNEWS);
-			Packet.m_Flags = NETSENDFLAG_CONNLESS;
-			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
-
 			RequestDDNetSrvList();
 
 			// request the map version list now
+			CNetChunk Packet;
 			mem_zero(&Packet, sizeof(Packet));
 			Packet.m_ClientID = -1;
 			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
@@ -1188,25 +1162,8 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 		}
 
-		// news
-		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_NEWS) + NEWS_SIZE) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_NEWS, sizeof(VERSIONSRV_NEWS)) == 0)
-		{
-			if (mem_comp(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
-				g_Config.m_UiPage = CMenus::PAGE_NEWS;
-
-			mem_copy(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
-
-			IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorage::TYPE_SAVE);
-			if (newsFile)
-			{
-				io_write(newsFile, m_aNews, sizeof(m_aNews));
-				io_close(newsFile);
-			}
-		}
-
 		// ddnet server list
-		// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length] 
+		// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length]
 		if(pPacket->m_DataSize >= (int)(sizeof(VERSIONSRV_DDNETLIST) + 8) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST)) == 0 &&
 			mem_comp((char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST), m_aDDNetSrvListToken, 4) == 0)
@@ -1267,15 +1224,15 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 	if(pPacket->m_DataSize == (int) sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
 	{
 		unsigned char *pP = (unsigned char*) pPacket->m_pData;
-		pP += sizeof(SERVERBROWSE_COUNT);				
-		int ServerCount = ((*pP)<<8) | *(pP+1); 
+		pP += sizeof(SERVERBROWSE_COUNT);
+		int ServerCount = ((*pP)<<8) | *(pP+1);
 		int ServerID = -1;
 		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
 		{
 			if(!m_pMasterServer->IsValid(i))
 				continue;
 			NETADDR tmp = m_pMasterServer->GetAddr(i);
-			if(net_addr_comp(&pPacket->m_Address, &tmp) == 0)			
+			if(net_addr_comp(&pPacket->m_Address, &tmp) == 0)
 			{
 				ServerID = i;
 				break;
@@ -2390,6 +2347,7 @@ void CClient::Update()
 	m_ResortServerBrowser = false;
 }
 
+//TODO: SUPPRIMER ??
 void CClient::VersionUpdate()
 {
 	if(m_VersionInfo.m_State == CVersionInfo::STATE_INIT)
@@ -2424,9 +2382,6 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder[RECORDER_MANUAL]));
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	Kernel()->RegisterInterface(static_cast<IAutoUpdate*>(&m_AutoUpdate));
-#endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
 }
 
@@ -2441,24 +2396,15 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
-#endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
-	
+
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 
 	m_Friends.Init();
 
-	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorage::TYPE_SAVE);
-	if (newsFile)
-	{
-		io_read(newsFile, m_aNews, NEWS_SIZE);
-		io_close(newsFile);
-	}
 }
 
 void CClient::Run()
@@ -2656,7 +2602,7 @@ void CClient::Run()
 				m_EditorActive = false;
 
 			Update();
-			
+
 			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()))
 			{
 				m_RenderFrames++;
@@ -2871,7 +2817,7 @@ void CClient::DemoSliceEnd()
 void CClient::Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DemoSliceBegin();	
+	pSelf->DemoSliceBegin();
 }
 
 void CClient::Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData)
@@ -3215,10 +3161,6 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
-
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	pClient->AutoUpdate()->ExecuteExit();
-#endif
 
 	return 0;
 }

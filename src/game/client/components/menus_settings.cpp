@@ -9,7 +9,6 @@
 #include <engine/graphics.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <engine/autoupdate.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
@@ -806,7 +805,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples-1 +17)%17;
 			CheckSettings = true;
 		}
-	
+
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxTextureQuality, Localize("Quality Textures"), g_Config.m_GfxTextureQuality, &Button))
 	{
@@ -1273,7 +1272,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		g_Config.m_ClMessageSystemLht = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemLht, &Button, g_Config.m_ClMessageSystemLht / 255.0f)*255.0f);
 
 		Left.HSplitTop(10.0f, &Label, &Left);
-	
+
 		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
 		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 
@@ -1545,7 +1544,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Pos.x + Out.x, Pos.y + Out.y);
 		Graphics()->QuadsDrawFreeform(&Freeform, 1);
 
-		// do inner	
+		// do inner
 		RGB = HslToRgb(vec3(g_Config.m_ClLaserInnerHue / 255.0f, g_Config.m_ClLaserInnerSat / 255.0f, g_Config.m_ClLaserInnerLht / 255.0f));
 		vec4 InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
 		Out = vec2(0.0f, -1.0f) * (2.25f);
@@ -1783,24 +1782,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	Miscellaneous.VSplitMid(&Left, &Right);
 	Left.VSplitRight(5.0f, &Left, 0);
 	Right.VMargin(5.0f, &Right);
-
-	// Auto Update
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	CUIRect HUDItem;
-	Left.HSplitTop(20.0f, &HUDItem, &Left);
-	HUDItem.VSplitMid(&HUDItem, &Button);
-	if(DoButton_CheckBox(&g_Config.m_ClAutoUpdate, Localize("Auto-Update"), g_Config.m_ClAutoUpdate, &HUDItem))
-		g_Config.m_ClAutoUpdate ^= 1;
-	Button.Margin(2.0f, &Button);
-	static int s_ButtonAutoUpdate = 0;
-	if (DoButton_Menu((void*)&s_ButtonAutoUpdate, Localize("Check now"), 0, &Button))
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Checking for an update");
-		RenderUpdating(aBuf);
-		AutoUpdate()->CheckUpdates(this);
-	}
-#endif
 
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);
