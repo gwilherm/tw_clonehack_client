@@ -1,6 +1,24 @@
-[DDraceNetwork](http://ddnet.tw)
-================================
+Teeworlds Clone Hack Client (DDNet based)
+===
 
-Our own flavor of DDRace, a Teeworlds mod. See the [website](http://ddnet.tw) for more information.
+Description
+---
+This is the teeworld's alternative client [DDNet](http://ddnet.tw) with an improved dummy.  
+Your dummy can now copy all your moves thanks to a new command cl\_dummy\_copymoves.
 
-Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=ddnet&uio=d4)).
+HowTo
+---
+In game :
+* Press Escape then "Connect Dummy"
+* Press F1 and type `cl\_dummy\_copymoves 1` to activate the clone
+
+Key bindings
+---
+You can bind commands to keys for a better experience.  
+
+In F1 console, type :
+> bind k "toggle cl\_dummy\_copymoves 0 1"
+
+
+- - -
+_by Keep Calm :)_
