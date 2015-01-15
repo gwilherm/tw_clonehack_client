@@ -294,8 +294,9 @@ void CServer::CClient::Reset()
 
 CServer::CServer()
 {
-	for(int i = 0; i < MAX_CLIENTS+1; i++)
-		m_aDemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		m_aDemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta, true);
+	m_aDemoRecorder[MAX_CLIENTS] = CDemoRecorder(&m_SnapshotDelta, false);
 
 	m_TickSpeed = SERVER_TICK_SPEED;
 
@@ -343,7 +344,7 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(i != ClientID && m_aClients[i].m_State >= CClient::STATE_READY)
 		{
-			if(str_comp(pName, m_aClients[i].m_aName) == 0)
+			if(str_utf8_comp_names(pName, m_aClients[i].m_aName) == 0)
 				return -1;
 		}
 
@@ -600,8 +601,12 @@ void CServer::DoSnapshot()
 		GameServer()->OnSnap(-1);
 		SnapshotSize = m_SnapshotBuilder.Finish(aData);
 
+		// for antiping: if the projectile netobjects contains extra data, this is removed and the original content restored before recording demo
+		unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
+		mem_copy(aExtraInfoRemoved, aData, SnapshotSize);
+		SnapshotRemoveExtraInfo(aExtraInfoRemoved);
 		// write snapshot
-		m_aDemoRecorder[MAX_CLIENTS].RecordSnapshot(Tick(), aData, SnapshotSize);
+		m_aDemoRecorder[MAX_CLIENTS].RecordSnapshot(Tick(), aExtraInfoRemoved, SnapshotSize);
 	}
 
 	// create snapshots for all clients
@@ -640,7 +645,14 @@ void CServer::DoSnapshot()
 			SnapshotSize = m_SnapshotBuilder.Finish(pData);
 
 			if(m_aDemoRecorder[i].IsRecording())
-				m_aDemoRecorder[i].RecordSnapshot(Tick(), aData, SnapshotSize);
+			{
+				// for antiping: if the projectile netobjects contains extra data, this is removed and the original content restored before recording demo
+				unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
+				mem_copy(aExtraInfoRemoved, aData, SnapshotSize);
+				SnapshotRemoveExtraInfo(aExtraInfoRemoved);
+				// write snapshot
+				m_aDemoRecorder[i].RecordSnapshot(Tick(), aExtraInfoRemoved, SnapshotSize);
+			}
 
 			Crc = pData->Crc();
 
@@ -800,7 +812,7 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 	SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 }
 
-void CServer::SendRconLineAuthed(const char *pLine, void *pUser)
+void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted)
 {
 	CServer *pThis = (CServer *)pUser;
 	static volatile int ReentryGuard = 0;
@@ -987,8 +999,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				return; // no map w/o password, sorry guys
 
 			int Chunk = Unpacker.GetInt();
-			int ChunkSize = 1024-128;
-			int Offset = Chunk * ChunkSize;
+			unsigned int ChunkSize = 1024-128;
+			unsigned int Offset = Chunk * ChunkSize;
 			int Last = 0;
 
 			lastask[ClientID] = Chunk;
@@ -999,7 +1011,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 
 			// drop faulty map data requests
-			if(Chunk < 0 || Offset < 0 || Offset > m_CurrentMapSize)
+			if(Chunk < 0 || Offset > m_CurrentMapSize)
 				return;
 
 			if(Offset+ChunkSize >= m_CurrentMapSize)
@@ -1420,12 +1432,12 @@ void CServer::PumpNetwork()
 				continue;
 	
 			int Chunk = lastsent[i]++;
-			int ChunkSize = 1024-128;
-			int Offset = Chunk * ChunkSize;
+			unsigned int ChunkSize = 1024-128;
+			unsigned int Offset = Chunk * ChunkSize;
 			int Last = 0;
 	
 			// drop faulty map data requests
-			if(Chunk < 0 || Offset < 0 || Offset > m_CurrentMapSize)
+			if(Chunk < 0 || Offset > m_CurrentMapSize)
 				continue;
 			if(Offset+ChunkSize >= m_CurrentMapSize)
 			{
@@ -1531,7 +1543,7 @@ int CServer::LoadMap(const char *pMapName)
 	// load complete map into memory for download
 	{
 		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-		m_CurrentMapSize = (int)io_length(File);
+		m_CurrentMapSize = (unsigned int)io_length(File);
 		if(m_pCurrentMapData)
 			mem_free(m_pCurrentMapData);
 		m_pCurrentMapData = (unsigned char *)mem_alloc(m_CurrentMapSize, 1);
@@ -1600,8 +1612,7 @@ int CServer::Run()
 
 	// start game
 	{
-		int64 ReportTime = time_get();
-		int ReportInterval = 3;
+		bool NonActive = false;
 
 		m_Lastheartbeat = 0;
 		m_GameStartTime = time_get();
@@ -1614,7 +1625,11 @@ int CServer::Run()
 
 		while(m_RunServer)
 		{
+			if(NonActive)
+				PumpNetwork();
+
 			set_new_tick();
+
 			int64 t = time_get();
 			int NewTicks = 0;
 
@@ -1688,34 +1703,10 @@ int CServer::Run()
 			// master server stuff
 			m_Register.RegisterUpdate(m_NetServer.NetType());
 
-			PumpNetwork();
+			if(!NonActive)
+				PumpNetwork();
 
-			if(ReportTime < time_get())
-			{
-				if(g_Config.m_Debug)
-				{
-					/*
-					static NETSTATS prev_stats;
-					NETSTATS stats;
-					netserver_stats(net, &stats);
-
-					perf_next();
-
-					if(config.dbg_pref)
-						perf_dump(&rootscope);
-
-					dbg_msg("server", "send=%8d recv=%8d",
-						(stats.send_bytes - prev_stats.send_bytes)/reportinterval,
-						(stats.recv_bytes - prev_stats.recv_bytes)/reportinterval);
-
-					prev_stats = stats;
-					*/
-				}
-
-				ReportTime += time_freq()*ReportInterval;
-			}
-
-			bool NonActive = true;
+			NonActive = true;
 
 			for(int c = 0; c < MAX_CLIENTS; c++)
 				if(m_aClients[c].m_State != CClient::STATE_EMPTY)
@@ -1727,7 +1718,7 @@ int CServer::Run()
 				if(g_Config.m_SvShutdownWhenEmpty)
 					m_RunServer = false;
 				else
-					net_socket_read_wait(m_NetServer.Socket(), time_freq());
+					net_socket_read_wait(m_NetServer.Socket(), 1000000);
 			}
 			else
 			{
@@ -1836,7 +1827,7 @@ void CServer::SaveDemo(int ClientID, float Time)
 {
 	if(IsRecording(ClientID))
 	{
-		m_aDemoRecorder[ClientID].Stop();
+		m_aDemoRecorder[ClientID].Stop(true);
 
 		// rename the demo
 		char aOldFilename[256];
@@ -1853,7 +1844,7 @@ void CServer::StartRecord(int ClientID)
 	{
 		char aFilename[128];
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, g_Config.m_SvPort, ClientID);
-		m_aDemoRecorder[ClientID].Start(Storage(), Console(), aFilename, GameServer()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "client");
+		m_aDemoRecorder[ClientID].Start(Storage(), Console(), aFilename, GameServer()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "client", m_CurrentMapSize, m_pCurrentMapData);
 	}
 }
 
@@ -2099,7 +2090,7 @@ static CServer *CreateServer() { return new CServer(); }
 
 int main(int argc, const char **argv) // ignore_convention
 {
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(FUZZING)
 	dbg_enable_threaded();
 #endif
 #if defined(CONF_FAMILY_WINDOWS)

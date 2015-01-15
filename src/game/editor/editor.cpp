@@ -29,6 +29,14 @@
 #include "auto_map.h"
 #include "editor.h"
 
+const char* vanillaImages[] = {"bg_cloud1", "bg_cloud2", "bg_cloud3",
+	"desert_doodads", "desert_main", "desert_mountains", "desert_mountains2",
+	"desert_sun", "generic_deathtiles", "generic_unhookable", "grass_doodads",
+	"grass_main", "jungle_background", "jungle_deathtiles", "jungle_doodads",
+	"jungle_main", "jungle_midground", "jungle_unhookables", "moon", "mountains",
+	"snow", "stars", "sun", "winter_doodads", "winter_main", "winter_mountains",
+	"winter_mountains2", "winter_mountains3"};
+
 int CEditor::ms_CheckerTexture;
 int CEditor::ms_BackgroundTexture;
 int CEditor::ms_CursorTexture;
@@ -462,30 +470,38 @@ vec4 CEditor::GetButtonColor(const void *pID, int Checked)
 	if(Checked < 0)
 		return vec4(0,0,0,0.5f);
 
-	if(Checked > 2)
+	switch(Checked)
 	{
-		if(UI()->HotItem() == pID)
-			return vec4(1,0.5,0,0.75f);
-		return vec4(1,0.5,0,0.5f);
-	}
-
-	if(Checked > 1)
-	{
-		if(UI()->HotItem() == pID)
-			return vec4(0,1,0,0.5f);
-		return vec4(0,1,0,0.33f);
-	}
-
-	if(Checked > 0)
-	{
+	case 5: // selected + image/sound should be embedded
 		if(UI()->HotItem() == pID)
 			return vec4(1,0,0,0.75f);
 		return vec4(1,0,0,0.5f);
-	}
 
-	if(UI()->HotItem() == pID)
-		return vec4(1,1,1,0.75f);
-	return vec4(1,1,1,0.5f);
+	case 4: // image/sound should be embedded
+		if(UI()->HotItem() == pID)
+			return vec4(1,0,0,1.0f);
+		return vec4(1,0,0,0.875f);
+
+	case 3: // selected + unused image/sound
+		if(UI()->HotItem() == pID)
+			return vec4(1,0,1,0.75f);
+		return vec4(1,0,1,0.5f);
+
+	case 2: // unused image/sound
+		if(UI()->HotItem() == pID)
+			return vec4(0,0,1,0.75f);
+		return vec4(0,0,1,0.5f);
+
+	case 1: // selected
+		if(UI()->HotItem() == pID)
+			return vec4(1,0,0,0.75f);
+		return vec4(1,0,0,0.5f);
+
+	default: // regular
+		if(UI()->HotItem() == pID)
+			return vec4(1,1,1,0.75f);
+		return vec4(1,1,1,0.5f);
+	}
 }
 
 int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
@@ -518,8 +534,7 @@ int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, co
 	TextRender()->SetCursor(&Cursor, NewRect.x + NewRect.w/2-tw/2, NewRect.y - 1.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 	Cursor.m_LineWidth = NewRect.w;
 	TextRender()->TextEx(&Cursor, pText, -1);
-	if(Checked > 1)
-		Checked -= 2;
+	Checked %= 2;
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -1230,7 +1245,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 				m_Map.m_UndoModified++;
 
 				static int s_SourcePopupID = 0;
-				UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupSource);
+				UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
@@ -3164,6 +3179,9 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 	float ImagesHeight = 30.0f + 14.0f * m_Map.m_lImages.size() + 27.0f;
 	float ScrollDifference = ImagesHeight - ToolBox.h;
 
+	if(!m_GuiActive)
+		return;
+
 	if(ImagesHeight > ToolBox.h)	// Do we even need a scrollbar?
 	{
 		CUIRect Scroll;
@@ -3233,28 +3251,39 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 			ToolBox.HSplitTop(12.0f, &Slot, &ToolBox);
 
 			int Selected = m_SelectedImage == i;
+
 			for(int x = 0; x < m_Map.m_lGroups.size(); ++x)
 				for(int j = 0; j < m_Map.m_lGroups[x]->m_lLayers.size(); ++j)
 					if(m_Map.m_lGroups[x]->m_lLayers[j]->m_Type == LAYERTYPE_QUADS)
 					{
 						CLayerQuads *pLayer = static_cast<CLayerQuads *>(m_Map.m_lGroups[x]->m_lLayers[j]);
 						if(pLayer->m_Image == i)
-						{
-							Selected = 2 + Selected;
 							goto done;
-						}
 					}
 					else if(m_Map.m_lGroups[x]->m_lLayers[j]->m_Type == LAYERTYPE_TILES)
 					{
 						CLayerTiles *pLayer = static_cast<CLayerTiles *>(m_Map.m_lGroups[x]->m_lLayers[j]);
 						if(pLayer->m_Image == i)
-						{
-							Selected = 2 + Selected;
 							goto done;
-						}
 					}
 
+			Selected += 2; // Image is unused
 			done:
+			if(Selected < 2 && e == 1)
+			{
+				bool found = false;
+				for(unsigned int k = 0; k < sizeof(vanillaImages) / sizeof(vanillaImages[0]); k++)
+				{
+					if(str_comp(m_Map.m_lImages[i]->m_aName, vanillaImages[k]) == 0)
+					{
+						found = true;
+						break;
+					}
+				}
+				if(!found)
+					Selected += 4; // Image should be embedded
+			}
+
 			if(int Result = DoButton_Editor(&m_Map.m_lImages[i], aBuf, Selected, &Slot,
 				BUTTON_CONTEXT, "Select image"))
 			{
@@ -3319,6 +3348,9 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 	static float s_ScrollValue = 0;
 	float SoundsHeight = 30.0f + 14.0f * m_Map.m_lSounds.size() + 27.0f;
 	float ScrollDifference = SoundsHeight - ToolBox.h;
+
+	if(!m_GuiActive)
+		return;
 
 	if(SoundsHeight > ToolBox.h)	// Do we even need a scrollbar?
 	{
@@ -3396,13 +3428,14 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 					{
 						CLayerSounds *pLayer = static_cast<CLayerSounds *>(m_Map.m_lGroups[x]->m_lLayers[j]);
 						if(pLayer->m_Sound == i)
-						{
-							Selected = 2 + Selected;
 							goto done;
-						}
 					}
 
+			Selected += 2; // Sound is unused
 			done:
+			if(Selected < 2 && e == 1)
+				Selected += 4; // Sound should be embedded
+
 			if(int Result = DoButton_Editor(&m_Map.m_lSounds[i], aBuf, Selected, &Slot,
 				BUTTON_CONTEXT, "Select sound"))
 			{

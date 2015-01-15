@@ -10,26 +10,47 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+static LOCK gs_FifoLock = 0;
+static volatile bool gs_stopFifoThread = false;
+
 FifoConsole::FifoConsole(IConsole *pConsole, char *pFifoFile, int flag)
 {
-	void *m_pFifoThread = thread_create(ListenFifoThread, this);
+	m_pFifoThread = thread_create(ListenFifoThread, this);
 	m_pConsole = pConsole;
 	m_pFifoFile = pFifoFile;
 	m_flag = flag;
+
+	gs_stopFifoThread = false;
+	if(gs_FifoLock == 0)
+		gs_FifoLock = lock_create();
+
 	pthread_detach((pthread_t)m_pFifoThread);
+}
+
+FifoConsole::~FifoConsole()
+{
+	lock_wait(gs_FifoLock);
+	gs_stopFifoThread = true;
+	lock_release(gs_FifoLock);
+	gs_FifoLock = 0;
 }
 
 void FifoConsole::ListenFifoThread(void *pUser)
 {
 	FifoConsole *pData = (FifoConsole *)pUser;
 
-	if (str_comp(pData->m_pFifoFile, "") == 0)
+	if(!gs_FifoLock)
+		return;
+	lock_wait(gs_FifoLock);
+	if(gs_stopFifoThread)
 		return;
 
 	mkfifo(pData->m_pFifoFile, 0600);
 
 	struct stat attribute;
 	stat(pData->m_pFifoFile, &attribute);
+
+	lock_release(gs_FifoLock);
 
 	if(!S_ISFIFO(attribute.st_mode))
 		return;

@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "system.h"
+#include "confusables.h"
 
 #if defined(CONF_FAMILY_UNIX)
 	#include <sys/time.h>
@@ -28,6 +29,12 @@
 	#include <dirent.h>
 
 	#if defined(CONF_PLATFORM_MACOSX)
+		// some lock and pthread functions are already defined in headers
+		// included from Carbon.h
+		// this prevents having duplicate definitions of those
+		#define _lock_set_user_
+		#define _task_user_
+
 		#include <Carbon/Carbon.h>
 	#endif
 	
@@ -55,6 +62,12 @@
 
 #if defined(__cplusplus)
 extern "C" {
+#endif
+
+#ifdef FUZZING
+static unsigned char gs_NetData[1024];
+static int gs_NetPosition = 0;
+static int gs_NetSize = 0;
 #endif
 
 IOHANDLE io_stdin() { return (IOHANDLE)stdin; }
@@ -263,6 +276,7 @@ static void logger_file(const char *line)
 }
 
 void dbg_logger_stdout() { dbg_logger(logger_stdout); }
+
 void dbg_logger_debugger() { dbg_logger(logger_debugger); }
 void dbg_logger_file(const char *filename)
 {
@@ -635,16 +649,11 @@ void lock_release(LOCK lock)
 	#endif
 #endif
 
-static int new_tick = 1;
+static int new_tick = -1;
 
 void set_new_tick()
 {
 	new_tick = 1;
-}
-
-void set_uncached_time_get()
-{
-	new_tick = -1;
 }
 
 /* -----  time ----- */
@@ -807,16 +816,15 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 {
 	struct addrinfo hints;
-	struct addrinfo *result;
+	struct addrinfo *result = NULL;
 	int e;
 	char host[256];
 	int port = 0;
 
 	if(priv_net_extract(hostname, host, sizeof(host), &port))
 		return -1;
-	
+
 	dbg_msg("host lookup", "host='%s' port=%d %d", host, port, types);
-	
 
 	mem_zero(&hints, sizeof(hints));
 
@@ -829,8 +837,14 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 
 	e = getaddrinfo(host, NULL, &hints, &result);
 
-	if(!result || e != 0)
+	if(!result)
 		return -1;
+
+	if(e != 0)
+	{
+		freeaddrinfo(result);
+		return -1;
+	}
 
 	sockaddr_to_netaddr(result->ai_addr, addr);
 	addr->port = port;
@@ -1060,6 +1074,13 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 
 			/* set receive buffer size */
 			setsockopt(socket, SOL_SOCKET, SO_RCVBUF, (char*)&recvsize, sizeof(recvsize));
+
+			{
+				/* set DSCP/TOS */
+				int iptos = 0x10 /* IPTOS_LOWDELAY */;
+				//int iptos = 46; /* High Priority */
+				setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&iptos, sizeof(iptos));
+			}
 		}
 	}
 
@@ -1082,11 +1103,26 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 
 			/* set receive buffer size */
 			setsockopt(socket, SOL_SOCKET, SO_RCVBUF, (char*)&recvsize, sizeof(recvsize));
+
+			{
+				/* set DSCP/TOS */
+				int iptos = 0x10 /* IPTOS_LOWDELAY */;
+				//int iptos = 46; /* High Priority */
+				setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&iptos, sizeof(iptos));
+			}
 		}
 	}
 
 	/* set non-blocking */
 	net_set_non_blocking(sock);
+
+#ifdef FUZZING
+	IOHANDLE file = io_open("bar.txt", IOFLAG_READ);
+	gs_NetPosition = 0;
+	gs_NetSize = io_length(file);
+	io_read(file, gs_NetData, 1024);
+	io_close(file);
+#endif /* FUZZING */
 
 	/* return */
 	return sock;
@@ -1094,6 +1130,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size)
 {
+#ifndef FUZZING
 	int d = -1;
 
 	if(addr->type&NETTYPE_IPV4)
@@ -1158,10 +1195,14 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	network_stats.sent_bytes += size;
 	network_stats.sent_packets++;
 	return d;
+#else
+	return size;
+#endif /* FUZZING */
 }
 
 int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize)
 {
+#ifndef FUZZING
 	char sockaddrbuf[128];
 	socklen_t fromlen;// = sizeof(sockaddrbuf);
 	int bytes = 0;
@@ -1188,6 +1229,33 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize)
 	else if(bytes == 0)
 		return 0;
 	return -1; /* error */
+#else
+	addr->type = NETTYPE_IPV4;
+	addr->port = 11111;
+	addr->ip[0] = 127;
+	addr->ip[1] = 0;
+	addr->ip[2] = 0;
+	addr->ip[3] = 1;
+
+	int CurrentData = 0;
+	while (gs_NetPosition < gs_NetSize && CurrentData < maxsize)
+	{
+		if(gs_NetData[gs_NetPosition] == '\n')
+		{
+			gs_NetPosition++;
+			break;
+		}
+
+		((unsigned char*)data)[CurrentData] = gs_NetData[gs_NetPosition];
+		CurrentData++;
+		gs_NetPosition++;
+	}
+
+	if (gs_NetPosition >= gs_NetSize)
+		exit(0);
+
+	return CurrentData;
+#endif /* FUZZING */
 }
 
 int net_udp_close(NETSOCKET sock)
@@ -1965,6 +2033,36 @@ char str_uppercase(char c)
 int str_toint(const char *str) { return atoi(str); }
 float str_tofloat(const char *str) { return atof(str); }
 
+
+int str_utf8_comp_names(const char *a, const char *b)
+{
+	int codeA;
+	int codeB;
+	int diff;
+
+	while(*a && *b)
+	{
+		do
+		{
+			codeA = str_utf8_decode(&a);
+		}
+		while(*a && !str_utf8_isspace(codeA));
+
+		do
+		{
+			codeB = str_utf8_decode(&b);
+		}
+		while(*b && !str_utf8_isspace(codeB));
+
+		diff = codeA - codeB;
+
+		if((diff < 0 && !str_utf8_is_confusable(codeA, codeB))
+		|| (diff > 0 && !str_utf8_is_confusable(codeB, codeA)))
+			return diff;
+	}
+
+	return *a - *b;
+}
 
 int str_utf8_isspace(int code)
 {

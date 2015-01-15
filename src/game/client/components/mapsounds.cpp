@@ -1,4 +1,3 @@
-
 #include <engine/engine.h>
 #include <engine/sound.h>
 
@@ -64,6 +63,9 @@ void CMapSounds::OnMapLoad()
 			{
 				CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
 
+				if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+					continue;
+
 				if(pSoundLayer->m_Sound == -1)
 					continue;
 
@@ -76,12 +78,13 @@ void CMapSounds::OnMapLoad()
 					CSourceQueueEntry source;
 					source.m_Sound = pSoundLayer->m_Sound;
 					source.m_pSource = &pSources[i];
+					source.m_HighDetail = pLayer->m_Flags&LAYERFLAG_DETAIL;
 
 					if(!source.m_pSource || source.m_Sound == -1)
 						continue;
 
-					m_lSourceQueue.add(source);		
-				}	
+					m_lSourceQueue.add(source);
+				}
 			}
 		}
 	}
@@ -105,7 +108,7 @@ void CMapSounds::OnRender()
 								Client()->IntraGameTick());
 		}
 		float offset = s_Time-pSource->m_pSource->m_TimeDelay;
-		if(offset >= 0.0f)
+		if(offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !pSource->m_HighDetail))
 		{
 			if(pSource->m_Voice.IsValid())
 			{
@@ -117,10 +120,25 @@ void CMapSounds::OnRender()
 				// need to enqueue
 				int Flags = 0;
 				if(pSource->m_pSource->m_Loop) Flags |= ISound::FLAG_LOOP;
+				if(!pSource->m_pSource->m_Pan) Flags |= ISound::FLAG_NO_PANNING;
 
 				pSource->m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
-				Sound()->SetVoiceMaxDistance(pSource->m_Voice, pSource->m_pSource->m_FalloffDistance);
 				Sound()->SetVoiceTimeOffset(pSource->m_Voice, offset);
+				Sound()->SetVoiceFalloff(pSource->m_Voice, pSource->m_pSource->m_Falloff/255.0f);
+				switch(pSource->m_pSource->m_Shape.m_Type)
+				{
+				case CSoundShape::SHAPE_CIRCLE:
+					{
+						Sound()->SetVoiceCircle(pSource->m_Voice, pSource->m_pSource->m_Shape.m_Circle.m_Radius);
+						break;
+					}
+
+				case CSoundShape::SHAPE_RECTANGLE:
+					{
+						Sound()->SetVoiceRectangle(pSource->m_Voice, fx2f(pSource->m_pSource->m_Shape.m_Rectangle.m_Width), fx2f(pSource->m_pSource->m_Shape.m_Rectangle.m_Height));
+						break;
+					}
+				};
 			}
 		}
 		else
@@ -149,6 +167,9 @@ void CMapSounds::OnRender()
 			if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
 				CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
+				
+				if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+					continue;
 
 				CSoundSource *pSources = (CSoundSource *)Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data);
 

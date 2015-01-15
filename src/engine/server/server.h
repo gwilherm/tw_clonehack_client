@@ -178,7 +178,7 @@ public:
 	char m_aCurrentMap[64];
 	unsigned m_CurrentMapCrc;
 	unsigned char *m_pCurrentMapData;
-	int m_CurrentMapSize;
+	unsigned int m_CurrentMapSize;
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
 	CRegister m_Register;
@@ -227,7 +227,7 @@ public:
 	void SendMap(int ClientID);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
-	static void SendRconLineAuthed(const char *pLine, void *pUser);
+	static void SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted = false);
 
 	void SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientID);

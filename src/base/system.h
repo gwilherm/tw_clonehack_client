@@ -437,7 +437,6 @@ typedef long long int64;
 #endif
 
 void set_new_tick();
-void set_uncached_time_get();
 
 /*
 	Function: time_get
@@ -1222,6 +1221,8 @@ unsigned str_quickhash(const char *str);
 		message - text to display
 */
 void gui_messagebox(const char *title, const char *message);
+
+int str_utf8_comp_names(const char *a, const char *b);
 
 int str_utf8_isspace(int code);
 

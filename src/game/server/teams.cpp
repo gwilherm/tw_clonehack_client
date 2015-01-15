@@ -19,6 +19,7 @@ void CGameTeams::Reset()
 		m_MembersCount[i] = 0;
 		m_LastChat[i] = 0;
 		m_TeamLocked[i] = false;
+		m_IsSaving[i] = false;
 	}
 }
 
@@ -646,7 +647,7 @@ void CGameTeams::KillSavedTeam(int Team)
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-			GameServer()->m_apPlayers[i]->KillCharacter(-2);
+			GameServer()->m_apPlayers[i]->ThreadKillCharacter(-2);
 
 	ChangeTeamState(Team, CGameTeams::TEAMSTATE_EMPTY);
 

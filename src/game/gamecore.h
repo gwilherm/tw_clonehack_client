@@ -200,8 +200,6 @@ public:
 	int m_ActiveWeapon;
 
 	bool m_NewHook;
-	vec2 m_NewHookPos;
-	vec2 m_NewHookDir;
 
 	int m_Jumped;
 	int m_JumpedTotal;
@@ -232,6 +230,9 @@ public:
 	vec2 m_LastVel;
 	int m_Colliding;
 	bool m_LeftWall;
+
+	void LimitForce(vec2 *Force);
+	void ApplyForce(vec2 Force);
 
 private:
 
@@ -268,5 +269,36 @@ private:
 	int m_TileSFlagsB;
 	bool IsRightTeam(int MapIndex);
 };
+
+//input count
+struct CInputCount
+{
+	int m_Presses;
+	int m_Releases;
+};
+
+inline CInputCount CountInput(int Prev, int Cur)
+{
+	CInputCount c = {0, 0};
+	Prev &= INPUT_STATE_MASK;
+	Cur &= INPUT_STATE_MASK;
+	int i = Prev;
+
+	while(i != Cur)
+	{
+		i = (i+1)&INPUT_STATE_MASK;
+		if(i&1)
+			c.m_Presses++;
+		else
+			c.m_Releases++;
+	}
+
+	return c;
+}
+
+bool UseExtraInfo(const CNetObj_Projectile *pProj);
+void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel, bool IsDDNet);
+void ExtractExtraInfo(const CNetObj_Projectile *pProj, int *Owner, bool *Explosive, int *Bouncing, bool *Freeze);
+void SnapshotRemoveExtraInfo(unsigned char *pData);
 
 #endif

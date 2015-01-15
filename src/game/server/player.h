@@ -36,6 +36,7 @@ public:
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
 	void OnDisconnect(const char *pReason);
 
+	void ThreadKillCharacter(int Weapon = WEAPON_GAME);
 	void KillCharacter(int Weapon = WEAPON_GAME);
 	CCharacter *GetCharacter();
 
@@ -112,6 +113,7 @@ public:
 
 private:
 	CCharacter *m_pCharacter;
+	int m_NumInputs;
 	CGameContext *m_pGameServer;
 
 	CGameContext *GameServer() const { return m_pGameServer; }
@@ -151,6 +153,7 @@ public:
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 	bool m_Afk;
+	int m_KillMe;
 
 	int m_ChatScore;
 

@@ -121,12 +121,14 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	CompressedSize = ms_Huffman.Compress(pPacket->m_aChunkData, pPacket->m_DataSize, &aBuffer[3], NET_MAX_PACKETSIZE-4);
 
 	// check if the compression was enabled, successful and good enough
+#ifndef FUZZING
 	if(CompressedSize > 0 && CompressedSize < pPacket->m_DataSize)
 	{
 		FinalSize = CompressedSize;
 		pPacket->m_Flags |= NET_PACKETFLAG_COMPRESSION;
 	}
 	else
+#endif
 	{
 		// use uncompressed data
 		FinalSize = pPacket->m_DataSize;
@@ -161,7 +163,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	// check the size
 	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
 	{
-		dbg_msg("", "packet too small, %d", Size);
+		//dbg_msg("", "packet too small, %d", Size);
 		return -1;
 	}
 
@@ -185,7 +187,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	{
 		if(Size < 6)
 		{
-			dbg_msg("", "connection less packet too small, %d", Size);
+			//dbg_msg("", "connection less packet too small, %d", Size);
 			return -1;
 		}
 
@@ -357,5 +359,7 @@ static const unsigned gs_aFreqTable[256+1] = {
 
 void CNetBase::Init()
 {
+#ifndef FUZZING
 	ms_Huffman.Init(gs_aFreqTable);
+#endif
 }

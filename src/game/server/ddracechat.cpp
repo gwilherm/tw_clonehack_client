@@ -317,7 +317,7 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 
 	if (pPlayer->GetCharacter() == 0)
 	{
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec",
 	"You can't spec while you are dead/a spectator.");
 	return;
 	}
@@ -329,8 +329,8 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 
 	if (pPlayer->m_Paused == CPlayer::PAUSED_FORCE)
 	{
-		str_format(aBuf, sizeof(aBuf), "You are force-paused. %ds left.", pPlayer->m_ForcePauseTime/pSelf->Server()->TickSpeed());
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause", aBuf);
+		str_format(aBuf, sizeof(aBuf), "You are force-specced. %ds left.", pPlayer->m_ForcePauseTime/pSelf->Server()->TickSpeed());
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec", aBuf);
 		return;
 	}
 
@@ -349,7 +349,7 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 
 	if (pPlayer->GetCharacter() == 0)
 	{
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause",
 	"You can't pause while you are dead/a spectator.");
 	return;
 	}
@@ -357,7 +357,7 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 	if(pPlayer->m_Paused == CPlayer::PAUSED_FORCE)
 	{
 		str_format(aBuf, sizeof(aBuf), "You are force-paused. %ds left.", pPlayer->m_ForcePauseTime/pSelf->Server()->TickSpeed());
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause", aBuf);
 		return;
 	}
 
@@ -614,12 +614,24 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 	if(g_Config.m_SvUseSQL)
 		if(pPlayer->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
 			return;
-#endif
 
 	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
-	pSelf->Score()->SaveTeam(Team, pResult->GetString(0), pResult->m_ClientID);
 
-#if defined(CONF_SQL)
+	const char* pCode = pResult->GetString(0);
+	char aCountry[4];
+	if(str_length(pCode) > 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
+		&& pCode[1] <= 'Z' && pCode[2] >= 'A' && pCode[2] <= 'Z' && pCode[3] == ' ')
+	{
+		str_copy(aCountry, pCode, 4);
+		pCode = pCode + 4;
+	}
+	else
+	{
+		str_copy(aCountry, g_Config.m_SvSqlServerName, 4);
+	}
+
+	pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
+
 	if(g_Config.m_SvUseSQL)
 		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
 #endif

@@ -56,8 +56,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
 	char aBuf[128];
 	CUIRect Label, Button, Left, Right, Game, Client, AutoReconnect;
-	MainView.HSplitTop(180.0f, &Game, &Client);
-	Client.HSplitTop(180.0f, &Client, &AutoReconnect);
+	MainView.HSplitTop(160.0f, &Game, &Client);
+	Client.HSplitTop(160.0f, &Client, &AutoReconnect);
 
 	// game
 	{
@@ -106,12 +106,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClResetWantedWeaponOnDeath, Localize("Reset wanted weapon on death"), g_Config.m_ClResetWantedWeaponOnDeath, &Button))
 		        g_Config.m_ClResetWantedWeaponOnDeath ^= 1;
 
-		// show hud
-		Left.HSplitTop(5.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), g_Config.m_ClShowhud, &Button))
-			g_Config.m_ClShowhud ^= 1;
-
 		// chat messages
 		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
@@ -126,11 +120,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		if(g_Config.m_ClNameplates)
 		{
-			Right.HSplitTop(2.5f, 0, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClNameplatesAlways, Localize("Always show name plates"), g_Config.m_ClNameplatesAlways, &Button))
-				g_Config.m_ClNameplatesAlways ^= 1;
-
 			Right.HSplitTop(2.5f, 0, &Right);
 			Right.HSplitTop(20.0f, &Label, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
@@ -191,18 +180,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			g_Config.m_ClAutoScreenshotMax = static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoScreenshotMax, &Button, g_Config.m_ClAutoScreenshotMax/1000.0f)*1000.0f+0.1f);
 		}
 
-		Right.HSplitTop(20.0f, &Button, &Right);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClConfirmDisconnect, Localize("Confirm disconnect from server"), g_Config.m_ClConfirmDisconnect, &Button))
-		  g_Config.m_ClConfirmDisconnect ^= 1;
-
-		Right.HSplitTop(5.0f, 0, &Right);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if (DoButton_CheckBox(&g_Config.m_ClPrintBroadcasts, Localize("Print broadcasts to console"), g_Config.m_ClPrintBroadcasts, &Button))
-		{
-			g_Config.m_ClPrintBroadcasts ^= 1;
-		}
-
 		Left.HSplitTop(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
 		Button.VSplitRight(20.0f, &Button, 0);
@@ -215,72 +192,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
 		g_Config.m_ClCpuThrottle= static_cast<int>(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
-	}
-
-	Left.HSplitTop(20.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if (DoButton_CheckBox(&g_Config.m_ClCpuThrottleInactive, Localize("CPU Throttle when window is inactive"), g_Config.m_ClCpuThrottleInactive, &Button))
-	{
-		g_Config.m_ClCpuThrottleInactive ^= 1;
-	}
-
-	AutoReconnect.HSplitTop(30.0f, &Label, &AutoReconnect);
-
-	UI()->DoLabelScaled(&Label, Localize("Reconnecting"), 20.0f, -1);
-
-	AutoReconnect.Margin(5.0f, &AutoReconnect);
-	AutoReconnect.VSplitMid(&Left, &Right);
-	Left.VSplitRight(5.0f, &Left, 0);
-	Right.VMargin(5.0f, &Right);
-
-	{
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if (DoButton_CheckBox(&g_Config.m_ClReconnectFull, Localize("Reconnect when server is full"), g_Config.m_ClReconnectFull, &Button))
-		{
-			g_Config.m_ClReconnectFull ^= 1;
-		}
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if (DoButton_CheckBox(&g_Config.m_ClReconnectBan, Localize("Reconnect when you are banned"), g_Config.m_ClReconnectBan, &Button))
-		{
-			g_Config.m_ClReconnectBan ^= 1;
-		}
-
-		Left.HSplitTop(10.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Label, &Left);
-		Button.VSplitRight(20.0f, &Button, 0);
-		char aBuf[64];
-		if (g_Config.m_ClReconnectBanTimeout == 1)
-		{
-			str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("second"));
-		}
-		else
-		{
-			str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("seconds"));
-		}
-		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-		Left.HSplitTop(20.0f, &Button, 0);
-		Button.HMargin(2.0f, &Button);
-		g_Config.m_ClReconnectBanTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectBanTimeout, &Button, g_Config.m_ClReconnectBanTimeout / 120.0f) * 120.0f);
-		if (g_Config.m_ClReconnectBanTimeout < 5)
-			g_Config.m_ClReconnectBanTimeout = 5;
-		Right.HSplitTop(10.0f, 0, &Right);
-		Right.HSplitTop(20.0f, &Label, &Right);
-		Button.VSplitRight(20.0f, &Button, 0);
-		if (g_Config.m_ClReconnectFullTimeout == 1)
-		{
-			str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectFullTimeout, Localize("second"));
-		}
-		else
-		{
-			str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectFullTimeout, Localize("seconds"));
-		}
-		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-		Right.HSplitTop(20.0f, &Button, 0);
-		Button.HMargin(2.0f, &Button);
-		g_Config.m_ClReconnectFullTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectFullTimeout, &Button, g_Config.m_ClReconnectFullTimeout / 120.0f) * 120.0f);
-		if (g_Config.m_ClReconnectFullTimeout < 1)
-			g_Config.m_ClReconnectFullTimeout = 1;
 	}
 }
 
@@ -1052,7 +963,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sound volume"), 14.0f, -1);
 		g_Config.m_SndVolume = (int)(DoScrollbarH(&g_Config.m_SndVolume, &Button, g_Config.m_SndVolume/100.0f)*100.0f);
-		MainView.HSplitTop(20.0f, 0, &MainView);
 	}
 
 	// volume slider map sounds
@@ -1062,9 +972,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Map Sound volume"), 14.0f, -1);
+		UI()->DoLabelScaled(&Label, Localize("Map sound volume"), 14.0f, -1);
 		g_Config.m_SndMapSoundVolume = (int)(DoScrollbarH(&g_Config.m_SndMapSoundVolume, &Button, g_Config.m_SndMapSoundVolume/100.0f)*100.0f);
-		MainView.HSplitTop(20.0f, 0, &MainView);
 	}
 }
 
@@ -1260,7 +1169,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
 	CUIRect Left, Right, HUD, Messages, Button, Label, Weapon, Laser;
 
-	MainView.HSplitTop(130.0f, &HUD, &MainView);
+	MainView.HSplitTop(150.0f, &HUD, &MainView);
 
 	HUD.HSplitTop(30.0f, &Label, &HUD);
 	UI()->DoLabelScaled(&Label, Localize("HUD"), 20.0f, -1);
@@ -1268,6 +1177,12 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	HUD.VSplitMid(&Left, &Right);
 	Left.VSplitRight(5.0f, &Left, 0);
 	Right.VMargin(5.0f, &Right);
+
+	// show hud
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), g_Config.m_ClShowhud, &Button))
+		g_Config.m_ClShowhud ^= 1;
+
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if (DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
@@ -1316,7 +1231,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	{
 		g_Config.m_ClShowVotesAfterVoting ^= 1;
 	}
-	MainView.HSplitTop(130.0f, &Messages, &MainView);
+	MainView.HSplitTop(170.0f, &Messages, &MainView);
 	Messages.HSplitTop(30.0f, &Label, &Messages);
 	Label.VSplitMid(&Label, &Button);
 	UI()->DoLabelScaled(&Label, Localize("Messages"), 20.0f, -1);
@@ -1711,34 +1626,25 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClAutoRaceRecord ^= 1;
 	}
 
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClDemoName, Localize("Save the player name within the demo"), g_Config.m_ClDemoName, &Button))
-	{
-		g_Config.m_ClDemoName ^= 1;
-	}
-
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClDemoShowSpeed, Localize("Show demo speed on change"), g_Config.m_ClDemoShowSpeed, &Button))
-	{
-		g_Config.m_ClDemoShowSpeed ^= 1;
-	}
-
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClRaceGhost, Localize("Ghost"), g_Config.m_ClRaceGhost, &Button))
 	{
 		g_Config.m_ClRaceGhost ^= 1;
 	}
 
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &Button))
+	if(g_Config.m_ClRaceGhost)
 	{
-		g_Config.m_ClRaceShowGhost ^= 1;
-	}
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &Button))
+		{
+			g_Config.m_ClRaceShowGhost ^= 1;
+		}
 
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
-	{
-		g_Config.m_ClRaceSaveGhost ^= 1;
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
+		{
+			g_Config.m_ClRaceSaveGhost ^= 1;
+		}
 	}
 
 	MainView.HSplitTop(250.0f, &Gameplay , &MainView);
@@ -1764,7 +1670,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitMid(&LeftLeft, &Button);
 
-		Button.VSplitLeft(60.0f, &Label, &Button);
+		Button.VSplitLeft(50.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
 		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f)*100.0f);
@@ -1781,40 +1687,44 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClShowQuads ^= 1;
 	}
 
+	Right.HSplitTop(20.0f, &Label, &Right);
+	Label.VSplitLeft(130.0f, &Label, &Button);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Default zoom"), g_Config.m_ClDefaultZoom);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+	//Right.HSplitTop(20.0f, &Button, 0);
+	Button.HMargin(2.0f, &Button);
+	g_Config.m_ClDefaultZoom= static_cast<int>(DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom/20.0f)*20.0f+0.1f);
+
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing (predict other players)"), g_Config.m_ClAntiPing, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
 	{
 		g_Config.m_ClAntiPing ^= 1;
 	}
 
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClAntiPingGrenade, Localize("AntiPing (predict grenades)"), g_Config.m_ClAntiPingGrenade, &Button))
+	if(g_Config.m_ClAntiPing)
 	{
-		g_Config.m_ClAntiPingGrenade ^= 1;
-	}
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if(DoButton_CheckBox(&g_Config.m_ClAntiPingPlayers, Localize("AntiPing: predict other players"), g_Config.m_ClAntiPingPlayers, &Button))
+		{
+			g_Config.m_ClAntiPingPlayers ^= 1;
+		}
 
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClUnpredictedShadow, Localize("Show unpredicted shadow tee"), g_Config.m_ClUnpredictedShadow, &Button))
-	{
-		g_Config.m_ClUnpredictedShadow ^= 1;
-	}
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if(DoButton_CheckBox(&g_Config.m_ClAntiPingWeapons, Localize("AntiPing: predict weapons"), g_Config.m_ClAntiPingWeapons, &Button))
+		{
+			g_Config.m_ClAntiPingWeapons ^= 1;
+		}
 
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClShowNinja, Localize("Show ninja skin"), g_Config.m_ClShowNinja, &Button))
-	{
-		g_Config.m_ClShowNinja ^= 1;
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if(DoButton_CheckBox(&g_Config.m_ClAntiPingGrenade, Localize("AntiPing: predict grenade paths"), g_Config.m_ClAntiPingGrenade, &Button))
+		{
+			g_Config.m_ClAntiPingGrenade ^= 1;
+		}
 	}
-
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClOldGunPosition, Localize("Old gun position"), g_Config.m_ClOldGunPosition, &Button))
+	else
 	{
-		g_Config.m_ClOldGunPosition ^= 1;
-	}
-
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClZoomBackgroundLayers, Localize("Zoom background layers"), g_Config.m_ClZoomBackgroundLayers, &Button))
-	{
-		g_Config.m_ClZoomBackgroundLayers ^= 1;
+		Right.HSplitTop(60.0f, 0, &Right);
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
@@ -1874,18 +1784,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	Left.VSplitRight(5.0f, &Left, 0);
 	Right.VMargin(5.0f, &Right);
 
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace binds"), g_Config.m_ClDDRaceBinds, &Button))
-	{
-		g_Config.m_ClDDRaceBinds ^= 1;
-	}
-
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClEditorUndo, Localize("Undo function in editor (could be buggy)"), g_Config.m_ClEditorUndo, &Button))
-	{
-		g_Config.m_ClEditorUndo ^= 1;
-	}
-
 	// Auto Update
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	CUIRect HUDItem;
@@ -1905,17 +1803,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 #endif
 
 	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ConnTimeout);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		UI()->DoLabelScaled(&Button, Localize("Timeout (in seconds):"), 14.0f, -1);
-		Button.VSplitLeft(190.0f, 0, &Button);
-		static float Offset = 0.0f;
-		DoEditBox(&g_Config.m_ConnTimeout, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
-		g_Config.m_ConnTimeout = clamp(str_toint(aBuf), 5, 1000);
-	}
-
-	{
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		char aBuf[128];
@@ -1924,6 +1811,8 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		static float s_OffsetCode = 0.0f;
 		DoEditBox(g_Config.m_ClTimeoutCode, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode);
 	}
+
+	Right.HSplitTop(5.0f, &Button, &Right);
 
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);

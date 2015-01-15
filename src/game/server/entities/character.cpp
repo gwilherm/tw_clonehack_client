@@ -16,33 +16,6 @@
 #include <game/server/score.h>
 #include "light.h"
 
-//input count
-struct CInputCount
-{
-	int m_Presses;
-	int m_Releases;
-};
-
-CInputCount CountInput(int Prev, int Cur)
-{
-	CInputCount c = {0, 0};
-	Prev &= INPUT_STATE_MASK;
-	Cur &= INPUT_STATE_MASK;
-	int i = Prev;
-
-	while(i != Cur)
-	{
-		i = (i+1)&INPUT_STATE_MASK;
-		if(i&1)
-			c.m_Presses++;
-		else
-			c.m_Releases++;
-	}
-
-	return c;
-}
-
-
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" player's part
@@ -119,6 +92,18 @@ void CCharacter::SetWeapon(int W)
 
 	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_WEAPONS)
 		m_Core.m_ActiveWeapon = 0;
+}
+
+void CCharacter::SetSolo(bool Solo)
+{
+	Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), Solo);
+
+	if(Solo)
+		m_NeededFaketuning |= FAKETUNE_SOLO;
+	else
+		m_NeededFaketuning &= ~FAKETUNE_SOLO;
+
+	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 }
 
 bool CCharacter::IsGrounded()
@@ -1558,20 +1543,16 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_SOLO_START) || (m_TileFIndex == TILE_SOLO_START)) && !Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now in a solo part.");
-		Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), true);
-		m_NeededFaketuning |= FAKETUNE_SOLO;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
+		SetSolo(true);
 	}
 	else if(((m_TileIndex == TILE_SOLO_END) || (m_TileFIndex == TILE_SOLO_END)) && Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now out of the solo part.");
-		Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), false);
-		m_NeededFaketuning &= ~FAKETUNE_SOLO;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
+		SetSolo(false);
 	}
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Core.m_Vel.x > 0)
 	{
-		
+		if((int)GameServer()->Collision()->GetPos(MapIndexL).x)
 			if((int)GameServer()->Collision()->GetPos(MapIndexL).x < (int)m_Core.m_Pos.x)
 				m_Core.m_Pos = m_PrevPos;
 		m_Core.m_Vel.x = 0;
@@ -1747,7 +1728,6 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_HookPos = m_Core.m_Pos;
 		}
 		return;
@@ -1768,7 +1748,6 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
 				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				m_Core.m_HookState = HOOK_RETRACTED;
 				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 				m_Core.m_HookPos = m_Core.m_Pos;
 			}
@@ -1787,7 +1766,6 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
 				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				m_Core.m_HookState = HOOK_RETRACTED;
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
 				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
@@ -1803,7 +1781,6 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_Pos = SpawnPos;
 			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 			m_Core.m_Vel = vec2(0,0);
@@ -1823,7 +1800,6 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
 				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				m_Core.m_HookState = HOOK_RETRACTED;
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
 				m_Core.m_HookPos = m_Core.m_Pos;
@@ -1837,7 +1813,6 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_Pos = SpawnPos;
 			m_Core.m_HookPos = m_Core.m_Pos;
 		}
@@ -2020,12 +1995,12 @@ bool CCharacter::UnFreeze()
 
 void CCharacter::GiveAllWeapons()
 {
-	 for(int i=1;i<NUM_WEAPONS-1;i++)
-	 {
-		 m_aWeapons[i].m_Got = true;
-		 if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
-	 }
-	 return;
+	for(int i=1;i<NUM_WEAPONS-1;i++)
+	{
+		m_aWeapons[i].m_Got = true;
+		if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
+	}
+	return;
 }
 
 void CCharacter::Pause(bool Pause)
@@ -2035,6 +2010,13 @@ void CCharacter::Pause(bool Pause)
 	{
 		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 		GameServer()->m_World.RemoveEntity(this);
+
+		if (m_Core.m_HookedPlayer != -1) // Keeping hook would allow cheats
+		{
+			m_Core.m_HookedPlayer = -1;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+		}
 	}
 	else
 	{
