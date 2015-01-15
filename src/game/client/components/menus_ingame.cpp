@@ -135,7 +135,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitLeft(170.0f, &Button, &ButtonBar);
 
 	static int s_DummyButton = 0;
-	if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? "Disconnect dummy" : "Connect dummy"), 0, &Button))
+	if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? "Disconnect clone" : "Connect clone"), 0, &Button))
 	{
 		if(!Client()->DummyConnected())
 		{

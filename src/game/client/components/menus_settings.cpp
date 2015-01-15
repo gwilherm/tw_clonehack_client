@@ -229,7 +229,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			m_NeedSendinfo = true;
 	}
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &Dummy))
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Clone settings"), s_Dummy, &Dummy))
 	{
 		s_Dummy ^= 1;
 	}
@@ -335,7 +335,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &DummyLabel))
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Clone settings"), s_Dummy, &DummyLabel))
 	{
 		s_Dummy ^= 1;
 	}
@@ -548,8 +548,8 @@ static CKeyInfo gs_aKeys[] =
 	{ "Screenshot", "screenshot", 0 },
 	{ "Scoreboard", "+scoreboard", 0 },
 	{ "Respawn", "kill", 0 },
-	{ "Toggle Dummy", "toggle cl_dummy 0 1", 0 },
-	{ "Hammerfly Dummy", "toggle cl_dummy_hammer 0 1", 0 },
+	{ "Toggle Clone", "toggle cl_clone_select 0 1", 0 },
+	{ "Hammerfly Clone", "toggle cl_clone_hammer 0 1", 0 },
 };
 
 /*	This is for scripts/update_localization.py to work, don't remove!
@@ -1799,7 +1799,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Dummy Timeout code"));
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clone Timeout code"));
 		UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 		static float s_OffsetCode = 0.0f;
 		DoEditBox(g_Config.m_ClDummyTimeoutCode, &Button, g_Config.m_ClDummyTimeoutCode, sizeof(g_Config.m_ClDummyTimeoutCode), 14.0f, &s_OffsetCode);

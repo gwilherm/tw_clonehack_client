@@ -89,18 +89,18 @@ MACRO_CONFIG_INT(UiColorizeGametype, ui_colorize_gametype, 1, 0, 1, CFGFLAG_CLIE
 
 MACRO_CONFIG_INT(GfxNoclip, gfx_noclip, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Disable clipping")
 
-// dummy
-MACRO_CONFIG_STR(DummyName, dummy_name, 16, "brainless tee", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Name of the Dummy")
-MACRO_CONFIG_STR(DummyClan, dummy_clan, 12, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Clan of the Dummy")
-MACRO_CONFIG_INT(DummyCountry, dummy_country, -1, -1, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Country of the Dummy")
-MACRO_CONFIG_INT(DummyUseCustomColor, dummy_use_custom_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors")
-MACRO_CONFIG_INT(DummyColorBody, dummy_color_body, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Dummy body color")
-MACRO_CONFIG_INT(DummyColorFeet, dummy_color_feet, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Dummy feet color")
-MACRO_CONFIG_STR(DummySkin, dummy_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Dummy skin")
-MACRO_CONFIG_INT(ClDummy, cl_dummy, 0, 0, 1, CFGFLAG_CLIENT, "0 - player / 1 - dummy")
-MACRO_CONFIG_INT(ClDummyCopyMoves, cl_dummy_copymoves, 0, 0, 1, CFGFLAG_CLIENT, "Whether dummy is copying your moves")
-MACRO_CONFIG_INT(ClDummyHammer, cl_dummy_hammer, 0, 0, 1, CFGFLAG_CLIENT, "Whether dummy is hammering for a hammerfly")
-MACRO_CONFIG_INT(ClDummyResetOnSwitch, cl_dummy_resetonswitch, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether dummy should stop pressing keys when you switch")
+// clone
+MACRO_CONFIG_STR(DummyName, clone_name, 16, "brainless tee", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Name of the clone")
+MACRO_CONFIG_STR(DummyClan, clone_clan, 12, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Clan of the clone")
+MACRO_CONFIG_INT(DummyCountry, clone_country, -1, -1, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Country of the clone")
+MACRO_CONFIG_INT(DummyUseCustomColor, clone_use_custom_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors")
+MACRO_CONFIG_INT(DummyColorBody, clone_color_body, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Clone body color")
+MACRO_CONFIG_INT(DummyColorFeet, clone_color_feet, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Clone feet color")
+MACRO_CONFIG_STR(DummySkin, clone_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "clone skin")
+MACRO_CONFIG_INT(ClDummy, cl_clone_select, 0, 0, 1, CFGFLAG_CLIENT, "0 - player / 1 - clone")
+MACRO_CONFIG_INT(ClCloneCopyMoves, cl_clone_copymoves, 0, 0, 1, CFGFLAG_CLIENT, "Whether clone is copying your moves")
+MACRO_CONFIG_INT(ClDummyHammer, cl_clone_hammer, 0, 0, 1, CFGFLAG_CLIENT, "Whether clone is hammering for a hammerfly")
+MACRO_CONFIG_INT(ClDummyResetOnSwitch, cl_clone_resetonswitch, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether clone should stop pressing keys when you switch")
 
 // server
 MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, 0, 0, CFGFLAG_SERVER, "Number of seconds to do warmup before round starts")

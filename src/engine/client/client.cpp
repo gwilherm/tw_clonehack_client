@@ -519,7 +519,7 @@ void CClient::SendInput()
 	{
 
 		// Keep Calm and clone yourself ;)
-		if(g_Config.m_ClDummyCopyMoves)
+		if(g_Config.m_ClCloneCopyMoves)
 			mem_copy(&DummyInput, &m_aInputs[g_Config.m_ClDummy][(m_CurrentInput[g_Config.m_ClDummy]+200-1)%200], sizeof(DummyInput));
 
 		if(!g_Config.m_ClDummyHammer)

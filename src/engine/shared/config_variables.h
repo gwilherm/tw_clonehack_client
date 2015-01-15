@@ -341,7 +341,7 @@ MACRO_CONFIG_INT(ClAutoUpdate, cl_auto_update, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLI
 MACRO_CONFIG_INT(ClOldGunPosition, cl_old_gun_position, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Tees hold gun a bit higher like in TW 0.6.1 and older")
 MACRO_CONFIG_INT(ClConfirmDisconnect, cl_confirm_disconnect, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Confirmation popup before disconnecting")
 MACRO_CONFIG_STR(ClTimeoutCode, cl_timeout_code, 64, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Timeout code to use")
-MACRO_CONFIG_STR(ClDummyTimeoutCode, cl_dummy_timeout_code, 64, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Dummy Timeout code to use")
+MACRO_CONFIG_STR(ClDummyTimeoutCode, cl_clone_timeout_code, 64, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Clone Timeout code to use")
 MACRO_CONFIG_STR(ClInputFifo, cl_input_fifo, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Fifo file to use as input for client console")
 #if defined(__ANDROID__)
 MACRO_CONFIG_INT(InpJoystick, inp_joystick, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Try to use a joystick as input")
