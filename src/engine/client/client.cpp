@@ -518,7 +518,7 @@ void CClient::SendInput()
 	if(m_DummyConnected)
 	{
 		// Keep Calm and clone yourself ;)
-		if(g_Config.m_ClCloneCopyMoves){
+		if(!g_Config.m_ClClonePause){
 			mem_copy(&DummyInput, &m_aInputs[g_Config.m_ClDummy][(m_CurrentInput[g_Config.m_ClDummy]+200-g_Config.m_ClCloneDelay-1)%200], sizeof(DummyInput));
 
 			if(g_Config.m_ClCloneMirror&1)		DummyInput.m_Direction = -DummyInput.m_Direction;  // Mirror Direction
