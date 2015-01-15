@@ -519,10 +519,10 @@ void CClient::SendInput()
 	{
 		// Keep Calm and clone yourself ;)
 		if(g_Config.m_ClCloneCopyMoves){
-			mem_copy(&DummyInput, &m_aInputs[g_Config.m_ClDummy][(m_CurrentInput[g_Config.m_ClDummy]+200-g_Config.m_ClCloneCopyMovesDelay-1)%200], sizeof(DummyInput));
+			mem_copy(&DummyInput, &m_aInputs[g_Config.m_ClDummy][(m_CurrentInput[g_Config.m_ClDummy]+200-g_Config.m_ClCloneDelay-1)%200], sizeof(DummyInput));
 
-			if(g_Config.m_ClCloneCopyMovesMirror&1)		DummyInput.m_Direction = -DummyInput.m_Direction;  // Mirror Direction
-			if(g_Config.m_ClCloneCopyMovesMirror&1<<1)	DummyInput.m_TargetX = -DummyInput.m_TargetX;      // Mirror Spin
+			if(g_Config.m_ClCloneMirror&1)		DummyInput.m_Direction = -DummyInput.m_Direction;  // Mirror Direction
+			if(g_Config.m_ClCloneMirror&1<<1)	DummyInput.m_TargetX = -DummyInput.m_TargetX;      // Mirror Spin
 		}
 
 		if(!g_Config.m_ClDummyHammer)

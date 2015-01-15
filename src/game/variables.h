@@ -99,8 +99,8 @@ MACRO_CONFIG_INT(DummyColorFeet, clone_color_feet, 65408, 0, 0xFFFFFF, CFGFLAG_C
 MACRO_CONFIG_STR(DummySkin, clone_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "clone skin")
 MACRO_CONFIG_INT(ClDummy, cl_clone_select, 0, 0, 1, CFGFLAG_CLIENT, "0 - player / 1 - clone")
 MACRO_CONFIG_INT(ClCloneCopyMoves, cl_clone_copymoves, 0, 0, 1, CFGFLAG_CLIENT, "Whether clone is copying your moves")
-MACRO_CONFIG_INT(ClCloneCopyMovesDelay, cl_clone_copymoves_delay, 0, 0, 199, CFGFLAG_CLIENT, "Adds a delay to dummy clone - 0 to 199 ticks (1 tick = 50ms)")
-MACRO_CONFIG_INT(ClCloneCopyMovesMirror, cl_clone_copymoves_mirror, 0, 0, 3, CFGFLAG_CLIENT, "0 - No mirror / 1 - Direction mirror / 2 - Spin mirror / 3 - Mirror both")
+MACRO_CONFIG_INT(ClCloneDelay, cl_clone_delay, 0, 0, 199, CFGFLAG_CLIENT, "Adds a delay to the clone - 0 to 199 ticks (1 tick = 50ms)")
+MACRO_CONFIG_INT(ClCloneMirror, cl_clone_mirror, 0, 0, 3, CFGFLAG_CLIENT, "0 - No mirror / 1 - Direction mirror / 2 - Spin mirror / 3 - Mirror both")
 MACRO_CONFIG_INT(ClDummyHammer, cl_clone_hammer, 0, 0, 1, CFGFLAG_CLIENT, "Whether clone is hammering for a hammerfly")
 MACRO_CONFIG_INT(ClDummyResetOnSwitch, cl_clone_resetonswitch, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether clone should stop pressing keys when you switch")
 
