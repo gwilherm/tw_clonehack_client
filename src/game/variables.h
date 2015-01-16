@@ -90,7 +90,7 @@ MACRO_CONFIG_INT(UiColorizeGametype, ui_colorize_gametype, 1, 0, 1, CFGFLAG_CLIE
 MACRO_CONFIG_INT(GfxNoclip, gfx_noclip, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Disable clipping")
 
 // clone
-MACRO_CONFIG_STR(DummyName, clone_name, 16, "brainless tee", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Name of the clone")
+MACRO_CONFIG_STR(DummyName, clone_name, 16, "Dolly", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Name of the clone")
 MACRO_CONFIG_STR(DummyClan, clone_clan, 12, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Clan of the clone")
 MACRO_CONFIG_INT(DummyCountry, clone_country, -1, -1, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Country of the clone")
 MACRO_CONFIG_INT(DummyUseCustomColor, clone_use_custom_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors")
