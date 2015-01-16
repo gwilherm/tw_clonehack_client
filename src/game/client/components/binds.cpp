@@ -288,7 +288,7 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind('h', "emote 2");
 		Bind('m', "emote 5");
 		Bind('s', "+showhookcoll");
-		Bind('x', "toggle cl_clone_select 0 1");
+		Bind('x', "toggle clone_select 0 1");
 #if !defined(__ANDROID__)
 		Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1");
 		Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100");
@@ -342,7 +342,7 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		if(!Get('s')[0])
 			Bind('s', "+showhookcoll");
 		if(!Get('x')[0])
-			Bind('x', "toggle cl_clone_select 0 1");
+			Bind('x', "toggle clone_select 0 1");
 		if(!Get(KEY_PAGEDOWN)[0])
 			Bind(KEY_PAGEDOWN, "cl_show_entities 0");
 		if(!Get(KEY_PAGEUP)[0])

@@ -240,15 +240,15 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("player_color_feet", ConchainSpecialInfoupdate, this);
 	Console()->Chain("player_skin", ConchainSpecialInfoupdate, this);
 
-	Console()->Chain("dummy_name", ConchainSpecialDummyInfoupdate, this);
-	Console()->Chain("dummy_clan", ConchainSpecialDummyInfoupdate, this);
-	Console()->Chain("dummy_country", ConchainSpecialDummyInfoupdate, this);
-	Console()->Chain("dummy_use_custom_color", ConchainSpecialDummyInfoupdate, this);
-	Console()->Chain("dummy_color_body", ConchainSpecialDummyInfoupdate, this);
-	Console()->Chain("dummy_color_feet", ConchainSpecialDummyInfoupdate, this);
-	Console()->Chain("dummy_skin", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("clone_name", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("clone_clan", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("clone_country", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("clone_use_custom_color", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("clone_color_body", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("clone_color_feet", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("clone_skin", ConchainSpecialDummyInfoupdate, this);
 
-	Console()->Chain("cl_dummy", ConchainSpecialDummy, this);
+	Console()->Chain("clone_select", ConchainSpecialDummy, this);
 
     Console()->Register("clone_kill", "", CFGFLAG_CLIENT, ConKillClone, this, "Kill your clone");
 	//

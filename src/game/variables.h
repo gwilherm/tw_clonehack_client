@@ -97,12 +97,12 @@ MACRO_CONFIG_INT(DummyUseCustomColor, clone_use_custom_color, 0, 0, 1, CFGFLAG_C
 MACRO_CONFIG_INT(DummyColorBody, clone_color_body, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Clone body color")
 MACRO_CONFIG_INT(DummyColorFeet, clone_color_feet, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Clone feet color")
 MACRO_CONFIG_STR(DummySkin, clone_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "clone skin")
-MACRO_CONFIG_INT(ClDummy, cl_clone_select, 0, 0, 1, CFGFLAG_CLIENT, "0 - player / 1 - clone")
-MACRO_CONFIG_INT(ClClonePause, cl_clone_pause, 0, 0, 1, CFGFLAG_CLIENT, "Put the clone paused")
-MACRO_CONFIG_INT(ClCloneDelay, cl_clone_delay, 0, 0, 199, CFGFLAG_CLIENT, "Adds a delay to the clone - 0 to 199 ticks (1 tick = 50ms)")
-MACRO_CONFIG_INT(ClCloneMirror, cl_clone_mirror, 0, 0, 3, CFGFLAG_CLIENT, "0 - No mirror / 1 - Direction mirror / 2 - Spin mirror / 3 - Mirror both")
-MACRO_CONFIG_INT(ClDummyHammer, cl_clone_hammer, 0, 0, 1, CFGFLAG_CLIENT, "Whether clone is hammering for a hammerfly")
-MACRO_CONFIG_INT(ClDummyResetOnSwitch, cl_clone_resetonswitch, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether clone should stop pressing keys when you switch")
+MACRO_CONFIG_INT(ClDummy, clone_select, 0, 0, 1, CFGFLAG_CLIENT, "0 - player / 1 - clone")
+MACRO_CONFIG_INT(ClClonePause, clone_pause, 0, 0, 1, CFGFLAG_CLIENT, "Put the clone paused")
+MACRO_CONFIG_INT(ClCloneDelay, clone_delay, 0, 0, 199, CFGFLAG_CLIENT, "Adds a delay to the clone - 0 to 199 ticks (1 tick = 50ms)")
+MACRO_CONFIG_INT(ClCloneMirror, clone_mirror, 0, 0, 3, CFGFLAG_CLIENT, "0 - No mirror / 1 - Direction mirror / 2 - Spin mirror / 3 - Mirror both")
+MACRO_CONFIG_INT(ClDummyHammer, clone_hammer, 0, 0, 1, CFGFLAG_CLIENT, "Whether clone is hammering for a hammerfly")
+MACRO_CONFIG_INT(ClDummyResetOnSwitch, clone_resetonswitch, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether clone should stop pressing keys when you switch")
 
 // server
 MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, 0, 0, CFGFLAG_SERVER, "Number of seconds to do warmup before round starts")

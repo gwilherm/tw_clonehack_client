@@ -548,8 +548,8 @@ static CKeyInfo gs_aKeys[] =
 	{ "Screenshot", "screenshot", 0 },
 	{ "Scoreboard", "+scoreboard", 0 },
 	{ "Respawn", "kill", 0 },
-	{ "Toggle Clone", "toggle cl_clone_select 0 1", 0 },
-	{ "Clone Pause", "toggle cl_clone_pause 0 1", 0 },
+	{ "Toggle Clone", "toggle clone_select 0 1", 0 },
+	{ "Clone Pause", "toggle clone_pause 0 1", 0 },
 };
 
 /*	This is for scripts/update_localization.py to work, don't remove!
