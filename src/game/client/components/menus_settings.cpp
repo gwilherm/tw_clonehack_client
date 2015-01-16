@@ -537,7 +537,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Vote no", "vote no", 0 },
 	{ "Chat", "chat all", 0 },
 	{ "Team chat", "chat team", 0 },
-	{ "Converse", "chat all /c ", 0 },
+	//{ "Converse", "chat all /c ", 0 },
 	{ "Show chat", "+show_chat", 0 },
 	{ "Emoticon", "+emote", 0 },
 	{ "Spectator mode", "+spectate", 0 },
@@ -548,6 +548,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Screenshot", "screenshot", 0 },
 	{ "Scoreboard", "+scoreboard", 0 },
 	{ "Respawn", "kill", 0 },
+	{ "Resp. Clone", "clone_kill", 0 },
 	{ "Toggle Clone", "toggle clone_select 0 1", 0 },
 	{ "Clone Pause", "toggle clone_pause 0 1", 0 },
 };
@@ -677,14 +678,14 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// chat settings
 	{
 		ChatSettings.HSplitTop(10.0f, 0, &ChatSettings);
-		ChatSettings.HSplitTop(MainView.h/3-45.0f, &ChatSettings, &MiscSettings);
+		ChatSettings.HSplitTop(MainView.h/3-70.0f, &ChatSettings, &MiscSettings);
 		RenderTools()->DrawUIRect(&ChatSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		ChatSettings.VMargin(10.0f, &ChatSettings);
 
 		TextRender()->Text(0, ChatSettings.x, ChatSettings.y, 14.0f*UI()->Scale(), Localize("Chat"), -1);
 
 		ChatSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &ChatSettings);
-		UiDoGetButtons(16, 20, ChatSettings);
+		UiDoGetButtons(16, 19, ChatSettings);
 	}
 
 	// misc settings
@@ -696,7 +697,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
 
 		MiscSettings.HSplitTop(14.0f+5.0f, 0, &MiscSettings);
-		UiDoGetButtons(20, 31, MiscSettings);
+		UiDoGetButtons(19, 31, MiscSettings);
 	}
 
 }
