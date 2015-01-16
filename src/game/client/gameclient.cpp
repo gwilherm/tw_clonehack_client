@@ -250,6 +250,7 @@ void CGameClient::OnConsoleInit()
 
 	Console()->Chain("cl_dummy", ConchainSpecialDummy, this);
 
+    Console()->Register("clone_kill", "", CFGFLAG_CLIENT, ConKillClone, this, "Kill your clone");
 	//
 	m_SuppressEvents = false;
 }
@@ -1736,7 +1737,7 @@ void CGameClient::SendDummyInfo(bool Start)
 void CGameClient::SendKill(int ClientID)
 {
 	CNetMsg_Cl_Kill Msg;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+    Client()->SendPackMsgExY(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
 void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
@@ -1746,7 +1747,12 @@ void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 
 void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 {
-	((CGameClient*)pUserData)->SendKill(-1);
+	((CGameClient*)pUserData)->SendKill(g_Config.m_ClDummy);
+}
+
+void CGameClient::ConKillClone(IConsole::IResult *pResult, void *pUserData)
+{
+	((CGameClient*)pUserData)->SendKill(!g_Config.m_ClDummy);
 }
 
 void CGameClient::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

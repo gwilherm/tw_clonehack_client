@@ -150,6 +150,15 @@ public:
 		return SendMsg(&Packer, Flags);
 	}
 
+    template<class U>
+	int SendPackMsgExY(U *pMsg, int Flags, int ClientID)
+	{
+		CMsgPacker Packer(pMsg->MsgID());
+		if(pMsg->Pack(&Packer))
+			return -1;
+		return SendMsgExY(&Packer, Flags, false, ClientID);
+	}
+
 	//
 	virtual const char *ErrorString() = 0;
 	virtual const char *LatestVersion() = 0;
