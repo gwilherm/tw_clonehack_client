@@ -741,7 +741,7 @@ void CMenus::RenderLoading()
 	Graphics()->QuadsEnd();
 
 
-	const char *pCaption = Localize("Loading DDNet Client");
+	const char *pCaption = Localize("Loading TW Clone Client");
 
 	CUIRect r;
 	r.x = x;
